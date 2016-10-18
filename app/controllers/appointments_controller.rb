@@ -54,7 +54,7 @@ class AppointmentsController < ApplicationController
       render json: @errors.to_json
       return 
     end
-    @appointment = Appointments.find(params[:id])
+    @appointment = Appointments.find_by_id(params[:id])
     if (@appointment.present?)
       if check_availability
         update_appointment

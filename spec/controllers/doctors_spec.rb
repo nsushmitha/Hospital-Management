@@ -67,6 +67,29 @@ RSpec.describe DoctorsController, :type => :controller  do
     end
   end
 
+  describe "PUT /doctors/:id" do
+
+   it "updates a doctor" do
+     
+     request.env["HTTP_ACCEPT"] = "application/json"
+     a = Doctors.create(:name => "Name1", :category => "Category1")
+     
+     docotor_params = {
+       "doctor" => {
+         "name" => "Name change"
+       }
+     }
+
+     request_headers = {
+       "Accept" => "application/json",
+       "Content-Type" => "application/json"
+     }
+       put :update, :id => a.id, doctor: {:name => "Name change"}
+       a.reload.name.should == "Name change"
+
+    end
+  end
+
 
    describe "DELETE /doctors/:id" do
     it "deletes an doctor" do
@@ -86,7 +109,13 @@ RSpec.describe DoctorsController, :type => :controller  do
        expect {
          delete :destroy, :id => a.id
        }.to change(Doctors, :count).by(-1)
+    end
 
+    it "deletes an doctor with his appointments" do
+      a = Doctors.create(:name => "Test name1", :category => "Test category2")
+      time = Time.parse("2016 November 12th 14:00")
+      b = Appointments.create(:appointment_time => time , :doctors_id => a.id, :patients_id => 1)
+      expect{ a.destroy}.to change{ Appointments.count}.by(-1)   
     end
   end
 end
