@@ -84,7 +84,7 @@ class AppointmentsController < ApplicationController
   end
 
   def book_appointment
-    appointment = Appointments.create(message_params) 
+    appointment = @scope2.appointments.create(message_params) 
     if appointment.save
       @result = {"status" => "Success",
                 "Booking ID:" => appointment.id}
@@ -99,12 +99,11 @@ class AppointmentsController < ApplicationController
     scope = Doctors.joins(:appointments).where("appointments.doctors_id = doctors.id AND doctors.category = ? AND appointments.appointment_time =?",category,time)
     booked_doctors = [-1]
     scope.map { |doctor| booked_doctors << doctor.id} if scope.present?
-    scope2 = Doctors.where('category = ? AND id NOT IN (?)',category,booked_doctors).find(:first)
-    if scope2.present?
-      params[:appointment][:doctors_id] = scope2.id
+    @scope2 = Doctors.where('category = ? AND id NOT IN (?)',category,booked_doctors).find(:first)
+    if @scope2.present?
       return true
     end
-    return false
+      return false
   end
 
   def validateParams
@@ -128,7 +127,7 @@ class AppointmentsController < ApplicationController
 
     def message_params
      params[:appointment][:appointment_time] = Time.parse(params[:appointment][:appointment_time])
-     params.require(:appointment).permit(:appointment_time,:doctors_id,:patients_id) 
+     params.require(:appointment).permit(:appointment_time,:patients_id) 
     end
 
     def patient_message_params
